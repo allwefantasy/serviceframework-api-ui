@@ -1,10 +1,11 @@
 import * as React from "react";
 
-import {Button, Card, Classes, Elevation, H3, Label, Slider, Switch} from "@blueprintjs/core";
+import {Button, Card, Classes, H3} from "@blueprintjs/core";
 import './App.css';
 import {MLSQLAPI, ServerError, APIResponse} from "./service/MLSQLAPI";
 import {OPEN_API_SPEC} from "./service/BackendConfig";
 import * as HTTP from "./service/HTTPMethod"
+import ActionDetail from "./components/ActionDetail";
 
 
 class App extends React.Component {
@@ -14,7 +15,8 @@ class App extends React.Component {
         const api = new MLSQLAPI(OPEN_API_SPEC)
         const self = this;
         this.state = {
-            controllers: []
+            controllers: [],
+            actionCard: null
         }
         /**
          *
@@ -29,12 +31,12 @@ class App extends React.Component {
                     res.forEach((controller) => {
                         const actions = []
                         controller.actions.forEach((action) => {
-                            actions.push(<ActionCard action={action}/>)
+                            actions.push(<ActionCard action={action} app={this}/>)
                         })
 
                         controllers.push(<div className="App-controller">
-                            <H3>{controller.name}</H3>
-                            {actions}
+                            <div className="App-controller-title">{controller.name.split(".").splice(-1)[0]}</div>
+                            <div>{actions}</div>
                         </div>)
                     })
 
@@ -51,7 +53,7 @@ class App extends React.Component {
     render() {
         return (
             <div className={App}>
-                {this.state.controllers}
+                {this.state.actionCard ? <ActionDetail actionCard={this.state.actionCard}/> : this.state.controllers}
             </div>
 
         );
@@ -60,30 +62,43 @@ class App extends React.Component {
 
 class ActionCard extends React.Component {
 
+    constructor(props) {
+        super(props)
+        /**
+         *
+         * @type {{actionCard:ActionCard app:App}}
+         */
+        this.state = {actionCard: this.props.action, app: this.props.app}
+    }
+
     parameters = (params) => {
         const res = []
         params.forEach((item) => {
-            res.push(<p>
-                {item.name}
-            </p>)
+            if (item.name === "Usage:")
+                res.push(<div>{item.description}</div>)
         })
         return res
     }
 
     render() {
-        const actionCard = this.props.action
+        const actionCard = this.state.actionCard
         return (<div className="App-controller-box">
             <Card elevation={4} interactive={false}>
                 <H3>
                     {actionCard.methods} {actionCard.path}
                 </H3>
-                <p>params:</p>
                 <p>
                     {this.parameters(actionCard.parameters)}
                 </p>
-                <Button text="Explore products" className={Classes.BUTTON}/>
+                <Button text="Detail" className={Classes.BUTTON} onClick={() => {
+                    this.detail()
+                }}/>
             </Card>
         </div>)
+    }
+
+    detail = () => {
+        this.state.app.setState({actionCard: this.state.actionCard})
     }
 }
 

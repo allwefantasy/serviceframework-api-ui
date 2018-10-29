@@ -7,8 +7,19 @@
     flex-flow: column;
 }
 
+.App-controller-title {
+    margin: 10px 20px;
+}
+
 .App-controller-box {
     width: 400px;
     margin: 10px 20px;
+}
+
+.App-action-detail {
+    margin: 10px 20px;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
 }
 
